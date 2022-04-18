@@ -32,7 +32,6 @@ if __name__ == "__main__":
                 listener = Thread(target= httpd.serve_forever) 
                 listener.daemon = True
                 listener.start()
-                #httpd.serve_forever()
             except KeyboardInterrupt:
                 pass
             #This method is used to terminate the listener object
@@ -54,21 +53,4 @@ if __name__ == "__main__":
     parser = ArgumentParser(description='Welcome to VENOM') 
     parser.add_argument('--port', type=int, required=True, default='8080', help='Port number, Default set to 8080 ') 
     args = parser.parse_args() 
-    app.run(host='0.0.0.0', port=args.port, debug=True)
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-        
+    app.run(host='0.0.0.0', port=args.port, debug=True)        

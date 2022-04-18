@@ -10,7 +10,7 @@ def registerAgent(agentID, agentIP): #timeout=86400):
                 'ip': agentIP,      
                 'task': '',  
                 'status': '', 
-                'resultFile': 'results/%s' % agentID   }
+                'taskResult': ''   }
 
     db.agents.insert_one(agent)  
 
@@ -70,3 +70,12 @@ def assignTask(agentID, task):
             'task': task
         }
     })
+
+def writeResult(agentID, result): 
+    db.agents.update_one({
+        'id': agentID },
+        {
+        '$set': { 
+            'taskResult': ''
+        }
+    }) 
