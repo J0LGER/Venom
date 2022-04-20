@@ -7,7 +7,7 @@ import os
 TO DO: 
 1- Response handling should not return a callback/error message but should act silent instead
 2- Implement end-to-end encryption
-
+3- Implementing the encryption inside 
 '''
 
 class Listener(BaseHTTPRequestHandler):
