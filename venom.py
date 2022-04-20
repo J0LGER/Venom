@@ -44,18 +44,18 @@ if __name__ == "__main__":
             
             elif (request.method == 'POST'): 
                 if (request.form.get('action') == 'create' and request.form.get('port')): 
-                    #try:
-                    id = "".join(choices(digits, k = 5))    
-                    port = int(request.form.get('port'))
-                    _LISTENERS_["listener_%s" % id] = HTTPServer(('0.0.0.0', port), Listener)
-                    saveListener(id, port)    
-                    listener = Thread(target= _LISTENERS_["listener_%s" % id].serve_forever) 
-                    listener.daemon = True
-                    listener.start()
-                    print(time.asctime(), "Start Server - %s:%s"%('0.0.0.0', str(request.form.get('port'))))
-                    return 'Listener created successfully'
-                    #except: 
-                    return 'Error while creating a listener!', 404
+                    try:
+                        id = "".join(choices(digits, k = 5))    
+                        port = int(request.form.get('port'))
+                        _LISTENERS_["listener_%s" % id] = HTTPServer(('0.0.0.0', port), Listener)
+                        saveListener(id, port)    
+                        listener = Thread(target= _LISTENERS_["listener_%s" % id].serve_forever) 
+                        listener.daemon = True
+                        listener.start()
+                        print(time.asctime(), "Start Server - %s:%s"%('0.0.0.0', str(request.form.get('port'))))
+                        return 'Listener created successfully'
+                    except: 
+                        return 'Error while creating a listener!', 404
                     
                 elif (request.form.get('action') == 'delete'): 
                     if(request.form.get('ListenerId') and delListener(request.form.get('ListenerId'))):  
