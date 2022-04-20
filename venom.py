@@ -25,7 +25,8 @@ if __name__ == "__main__":
                  'port': 27017		 } 
     
     _SECRET_ = "".join(choices(ascii_uppercase + digits, k = 20))
- 
+    _LISTENERS_ = dict()
+
     @app.route('/', methods = ['GET']) 
     def index(): 
         return render_template('index.html') 
@@ -43,22 +44,24 @@ if __name__ == "__main__":
             
             elif (request.method == 'POST'): 
                 if (request.form.get('action') == 'create' and request.form.get('port')): 
-                    try:
-                        id = "".join(choices(digits, k = 5))    
-                        port = int(request.form.get('port'))
-                        locals()["listener_%s" % id] = HTTPServer(('0.0.0.0', port), Listener)
-                        saveListener(id, port)    
-                        listener = Thread(target= locals()["listener_%s" % id].serve_forever) 
-                        listener.daemon = True
-                        listener.start()
-                        print(time.asctime(), "Start Server - %s:%s"%('0.0.0.0', str(request.form.get('port'))))
-                        return 'Listener created successfully'
-                    except:
-                        return 'Error while creating a listener!', 404
-                    #This method is used to terminate the listener object
-                    #locals()["listener_%s" % id].server_close()
+                    #try:
+                    id = "".join(choices(digits, k = 5))    
+                    port = int(request.form.get('port'))
+                    _LISTENERS_["listener_%s" % id] = HTTPServer(('0.0.0.0', port), Listener)
+                    saveListener(id, port)    
+                    listener = Thread(target= _LISTENERS_["listener_%s" % id].serve_forever) 
+                    listener.daemon = True
+                    listener.start()
+                    print(time.asctime(), "Start Server - %s:%s"%('0.0.0.0', str(request.form.get('port'))))
+                    return 'Listener created successfully'
+                    #except: 
+                    return 'Error while creating a listener!', 404
+                    
                 elif (request.form.get('action') == 'delete'): 
                     if(request.form.get('ListenerId') and delListener(request.form.get('ListenerId'))):  
+                        print(_LISTENERS_)
+                        id = request.form.get('ListenerId')
+                        _LISTENERS_["listener_%s" % id].server_close() 
                         return 'Listener deleted successfully', 200
                     else: 
                         return 'No Listener with specified ID found!', 404 
