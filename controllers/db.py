@@ -82,3 +82,7 @@ def writeResult(agentID, result):
         }
     }) 
 
+def getKey(id): 
+    return db.listeners.find_one({ 'id': { '$eq': id } }).get('key')
+ 
+ 

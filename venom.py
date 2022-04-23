@@ -24,6 +24,7 @@ if __name__ == "__main__":
                  'host': 'localhost',
                  'port': 27017		 } 
     
+    #This secret is for JWT. 
     _SECRET_ = "".join(choices(ascii_uppercase + digits, k = 20))
     _LISTENERS_ = dict()
 
@@ -52,7 +53,7 @@ if __name__ == "__main__":
                         listener = Thread(target= _LISTENERS_["listener_%s" % id].serve_forever) 
                         listener.daemon = True
                         listener.start()
-                        print(time.asctime(), "Start Server - %s:%s"%('0.0.0.0', str(request.form.get('port'))))
+                        print(time.asctime(), "Start Listener - %s:%s"%('0.0.0.0', str(request.form.get('port'))))
                         return 'Listener created successfully'
                     except: 
                         return 'Error while creating a listener!', 404
@@ -62,6 +63,8 @@ if __name__ == "__main__":
                         print(_LISTENERS_)
                         id = request.form.get('ListenerId')
                         _LISTENERS_["listener_%s" % id].server_close() 
+                        del _LISTENERS_["listener_%s" % id]
+                        print(time.asctime(), "Stop Listener - %s:%s"%('0.0.0.0', str(request.form.get('port'))))
                         return 'Listener deleted successfully', 200
                     else: 
                         return 'No Listener with specified ID found!', 404 

