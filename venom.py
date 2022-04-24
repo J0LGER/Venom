@@ -50,12 +50,12 @@ if __name__ == "__main__":
                     try:
                         id = "".join(choices(digits, k = 5))    
                         port = int(request.form.get('port'))
-                        _LISTENERS_["listener_%s" % id] = HTTPServer(('0.0.0.0', port), Listener(id))
+                        _LISTENERS_["listener_%s" % id] = HTTPServer(('0.0.0.0', port), Listener)
                         #----------------------------------------------------------------------
                         AESKey = os.urandom(16)
                         #----------------------------------------------------------------------
                         saveListener(id, port, AESKey)    
-                        listener = Thread(target= _LISTENERS_["listener_%s" % id].serve_forever) 
+                        listener = Thread(target = _LISTENERS_["listener_%s" % id].serve_forever) 
                         listener.daemon = True
                         listener.start()
                         print(time.asctime(), "Start Server - %s:%s"%('0.0.0.0', str(request.form.get('port'))))

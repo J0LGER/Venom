@@ -4,6 +4,9 @@ from Crypto.Util.Padding import pad, unpad
 from controllers.db import *
 
 
+'''TO-DO: 
+1- Implement a fixed size cipher 
+''' 
 
 def encrypt(id, task):
     key = getKey(id)

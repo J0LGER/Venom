@@ -10,7 +10,9 @@ def registerAgent(agentID, agentIP, timeout=86400):
                 'ip': agentIP,      
                 'task': '',  
                 'status': '', 
-                'taskResult': ''   }
+                'taskResult': '', 
+                'BindlistenerId': ''   
+                }
 
     db.agents.insert_one(agent)  
 
@@ -23,9 +25,10 @@ def deleteAgent(agentID):
     db.agents.delete_one({'id': { '$eq': agentID } })
 
 
-def saveListener(listenerId, port): 
+def saveListener(listenerId, port, key): 
     listener = {  'id': listenerId, 
-                  'port': port      }                   
+                  'port': port,
+                  'key': key      }                   
     db.listeners.insert_one(listener) 
 
 
@@ -83,6 +86,15 @@ def writeResult(agentID, result):
     }) 
 
 def getKey(id): 
-    return db.listeners.find_one({ 'id': { '$eq': id } }).get('key')
+    return db.listeners.find_one({
+         'id': { 
+             '$eq': id } 
+             }).get('key')
+
+def getAgentListener(agentID):  
+    return db.agents.find_one({
+         'id': {
+              '$eq': agentID } 
+              }).get('BindlistenerId')
  
  
