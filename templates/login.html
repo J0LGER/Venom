@@ -1,0 +1,137 @@
+<!DOCTYPE html> 
+<html>  
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Venom</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    </head> 
+
+
+<body> 
+      <div id="app">
+       
+        <div>
+            <v-app-bar
+              color="deep-red accent-4"
+              dense
+              dark
+            >
+              <v-img src="/static/images/venom.png"  max-height="30"
+              max-width="40"> </v-img>
+              <v-toolbar-title>&nbsp;Venom</v-toolbar-title>
+            
+              <v-spacer></v-spacer>
+        
+              <v-btn icon>
+              </v-btn>
+        
+              <v-btn icon>
+                <v-icon>mdi-magnify</v-icon>
+              </v-btn>
+        
+              <v-menu
+                left
+                bottom
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon>mdi-dots-vertical</v-icon>
+                  </v-btn>
+                </template>
+        
+                <v-list>
+                  <v-list-item
+                    v-for="n in 5"
+                    :key="n"
+                    @click="() => {}"
+                  >
+                    <v-list-item-title>Option {{ n }}</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </v-app-bar>
+          </div>
+        <v-app>
+            <v-dialog v-model="dialog" persistent max-width="600px" min-width="360px">
+                <div>
+                    <v-tabs v-model="tab" show-arrows background-color="deep-red accent-4" icons-and-text dark grow>
+                        <v-tabs-slider color="red darken-4"></v-tabs-slider>
+                        <v-tab v-for="i in tabs" :key="i">
+                            <v-icon large v-text="i.icon"></v-icon>
+                            <div class="caption py-1" v-text="i.icon"></div>
+                        </v-tab>
+                        <v-tab-item>
+                            <v-card class="px-4">
+                                <v-card-text>
+                                    <v-form ref="loginForm" v-model="valid" lazy-validation>
+                                        <v-row>
+                                            <v-col cols="12">
+                                                <v-text-field v-model="loginEmail" :rules="loginEmailRules" label="E-mail" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                <v-text-field v-model="loginPassword" :append-icon="show1?'eye':'eye-off'" :rules="[rules.required, rules.min]" :type="show1 ? 'text' : 'password'" label="Password" hint="At least 8 characters" counter @click:append="show1 = !show1"></v-text-field>
+                                            </v-col>
+                                            <v-col class="d-flex" cols="12" sm="6" xsm="12">
+                                            </v-col>
+                                            <v-spacer></v-spacer>
+                                            <v-col class="d-flex" cols="12" sm="3" xsm="12" align-end>
+                                                <v-btn x-large block :disabled="!valid" color="red" @click="validate"> Login </v-btn>
+                                            </v-col>
+                                        </v-row>
+                                        
+                                    </v-form>
+                                </v-card-text>
+                            </v-card>
+                        </v-tab-item>
+                        <v-tab-item>
+                            <v-card class="px-4">
+                                <v-card-text>
+                                    <v-form ref="registerForm" v-model="valid" lazy-validation>
+                                        <v-row>
+                                            <v-col cols="12" sm="6" md="6">
+                                                <v-text-field v-model="firstName" :rules="[rules.required]" label="First Name" maxlength="20" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="6">
+                                                <v-text-field v-model="lastName" :rules="[rules.required]" label="Last Name" maxlength="20" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                <v-text-field v-model="email" :rules="emailRules" label="E-mail" required></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                <v-text-field v-model="password" :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" :rules="[rules.required, rules.min]" :type="show1 ? 'text' : 'password'" name="input-10-1" label="Password" hint="At least 8 characters" counter @click:append="show1 = !show1"></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                <v-text-field block v-model="verify" :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" :rules="[rules.required, passwordMatch]" :type="show1 ? 'text' : 'password'" name="input-10-1" label="Confirm Password" counter @click:append="show1 = !show1"></v-text-field>
+                                            </v-col>
+                                            <div>
+                                                
+                                            </div>  
+                                            <v-spacer></v-spacer>
+                                            <v-col class="d-flex ml-auto" cols="12" sm="3" xsm="12">
+                                                <v-btn x-large block :disabled="!valid" color="red" @click="validate">Register</v-btn>    
+                                            </v-col>
+                                        </v-row>
+                                    </v-form>
+                                </v-card-text>
+                            </v-card>
+                        </v-tab-item>
+                    </v-tabs>
+                </div>
+            </v-dialog>
+        </v-app>
+    </div>
+
+
+</body> 
+<script src="https://unpkg.com/vue@2.1.3/dist/vue.js"> </script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="/static/js/login.js"> </script> 

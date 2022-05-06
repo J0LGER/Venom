@@ -2,22 +2,27 @@ import os
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from controllers.db import *
-
-
-'''TO-DO: 
-1- Implement a fixed size cipher 
-''' 
+from base64 import b64decode, b64encode
+ 
 
 def encrypt(id, task):
-    key = getKey(id)
+    k = getKey(id)
+    base64_bytes = k.encode("ascii")
+    key = b64decode(base64_bytes)
     IV = os.urandom(16)
     c = AES.new(key, AES.MODE_CBC, IV)
-    cipher = IV + c.encrypt(pad(bytes(task, 'utf-8'),AES.block_size))
+    ct = IV + c.encrypt(pad(bytes(task, 'utf-8'),AES.block_size))
+    base64_bytes = b64encode(ct)
+    cipher = base64_bytes.decode("ascii")
     return cipher
 
 
-def decrypt(id, result):
-    key = getKey(id)
+def decrypt(id, eresult):
+    k = getKey(id)
+    base64_bytes = k.encode("ascii")
+    key = b64decode(base64_bytes)
+    base64_bytes = eresult.encode("ascii")
+    result = b64decode(base64_bytes)
     IV = result[:AES.block_size]
     cipher = AES.new(key, AES.MODE_CBC, IV)
     pt = cipher.decrypt(result[AES.block_size:])
