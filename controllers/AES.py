@@ -21,8 +21,8 @@ def decrypt(id, eresult):
     k = getKey(id)
     base64_bytes = k.encode("ascii")
     key = b64decode(base64_bytes)
-    base64_bytes = eresult.encode("ascii")
-    result = b64decode(base64_bytes)
+    #base64_bytes = eresult.encode("ascii")
+    result = b64decode(eresult)
     IV = result[:AES.block_size]
     cipher = AES.new(key, AES.MODE_CBC, IV)
     pt = cipher.decrypt(result[AES.block_size:])

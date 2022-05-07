@@ -18,7 +18,7 @@ new Vue({
             password: this.loginPassword
           }
         }).then(
-          response => window.location.href = '/dashboard').catch(
+          response => window.location.href = '/').catch(
           function (error) {
           // handle error
           alert(error.response.data)
