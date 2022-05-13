@@ -2,6 +2,11 @@ from functools import wraps
 import jwt 
 from flask import * 
 
+
+''' 
+To do: 
+1- Add SameSite attribute to cookies
+'''
 def token_required(secret):
     def decorator(f):
         @wraps(f)
