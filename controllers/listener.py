@@ -4,9 +4,11 @@ from http.server import BaseHTTPRequestHandler
 import os
 from controllers.AES import *
 from http.server import HTTPServer
+
 ''' 
 TO DO: 
 1- Response handling should not return a callback/error message but should act silent instead
+2- Listeners should be cleared afetr reboot
 '''
 
 

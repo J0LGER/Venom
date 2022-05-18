@@ -48,13 +48,12 @@ def getListeners():
 
 
 def delListener(id):
-    if(db.listeners.delete_one({'id': {'$eq': id}})):
+
+    if(db.listeners.find_one({'id': {'$eq': id}})):
+        db.listeners.delete_one({'id': {'$eq': id}})
         return True
     else:
         return False
-
-
-
 
 def checkTask(agentID):
     task = db.agents.find_one({'id': {'$eq': agentID}}).get('task')
@@ -285,7 +284,7 @@ def migrate():
             'email': 'venom@venom.local', 
             'password': sha256('venom1234'.encode('utf-8')).hexdigest()
         }) 
-    if not db.implants.find_one({'type': 'linux' }):
-        db.implants.insert_one({'implant': implant_linux, 'type': 'linux'}) 
-    if not db.implants.find_one({'type': 'windows' }):
-        db.implants.insert_one({'implant': implant_windows, 'type': 'windows'})
+    if not db.implants.find_one({'type': 'Linux' }):
+        db.implants.insert_one({'implant': implant_linux, 'type': 'Linux'}) 
+    if not db.implants.find_one({'type': 'Windows' }):
+        db.implants.insert_one({'implant': implant_windows, 'type': 'Windows'})

