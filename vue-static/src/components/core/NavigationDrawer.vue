@@ -32,30 +32,15 @@
         <v-list-tile-title :class="[{'active': selectedIndex === 3}, 'item-title' ]">{{ $t('Implants') }}</v-list-tile-title>
       </v-list-tile>
 
-      <v-list-group
-        prepend-icon="pageview">
-        <v-list-tile slot="activator">
-          <v-list-tile-title class="item-title">{{ $t('widgets') }}</v-list-tile-title>
-        </v-list-tile>
-        <v-list-tile @click="changeRoute('Social', 4)">
-          <v-list-tile-action>
-            <v-icon>group</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-title :class="[{'active': selectedIndex === 4}, 'item-title' ]">{{ $t('social') }}</v-list-tile-title>
-        </v-list-tile>
-        <v-list-tile @click="changeRoute('Chart', 5)">
-          <v-list-tile-action>
-            <v-icon>bar_chart</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-title :class="[{'active': selectedIndex === 5}, 'item-title' ]">{{ $t('charts') }}</v-list-tile-title>
-        </v-list-tile>
-        <v-list-tile @click="changeRoute('Media', 6)">
-          <v-list-tile-action>
-            <v-icon>perm_media</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-title :class="[{'active': selectedIndex === 6}, 'item-title' ]">{{ $t('media') }}</v-list-tile-title>
-        </v-list-tile>
-    </v-list-group>
+      
+     <v-list-tile @click="changeRoute('venom', 4)">
+        <v-list-tile-action>
+          <v-icon>group</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-title :class="[{'active': selectedIndex === 3}, 'item-title' ]">{{ $t('Venom') }}</v-list-tile-title>
+      </v-list-tile>
+
+
 
       <v-list-group
         prepend-icon="select_all">

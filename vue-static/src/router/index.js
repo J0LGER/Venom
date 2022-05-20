@@ -8,6 +8,7 @@ import Snackbar from '../pages/Snackbar.vue';
 import Chart from '../pages/Chart.vue';
 import Implants from '../pages/Implants.vue';
 import Listeners from '../pages/Listeners.vue';
+import Venom from '../pages/Venom.vue';
 import Login from '../pages/core/Login.vue';
 import Error from '../pages/core/Error.vue';
 
@@ -61,13 +62,13 @@ export default new Router({
       }
     },
     {
-      path: '/social',
-      name: 'Social',
-      component: Social,
+      path: '/venom',
+      name: 'venom',
+      component: Venom,
       meta: {
         breadcrumb: [
           { name: 'dashboard', href: 'Dashboard' },
-          { name: 'social' }
+          { name: 'venom' }
         ]
       }
     },
