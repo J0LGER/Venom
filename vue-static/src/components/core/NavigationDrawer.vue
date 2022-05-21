@@ -37,7 +37,7 @@
         <v-list-tile-action>
           <v-icon>group</v-icon>
         </v-list-tile-action>
-        <v-list-tile-title :class="[{'active': selectedIndex === 3}, 'item-title' ]">{{ $t('Venom') }}</v-list-tile-title>
+        <v-list-tile-title :class="[{'active': selectedIndex === 4}, 'item-title' ]">{{ $t('Venom') }}</v-list-tile-title>
       </v-list-tile>
 
 

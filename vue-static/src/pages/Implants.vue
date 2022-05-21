@@ -7,6 +7,10 @@
   
   <v-card class="px-4">
   <v-card-text>
+  <v-card-title>
+      Listeners
+      <v-spacer></v-spacer>
+    </v-card-title>
   <v-data-table
       :headers="headers"
       :items="listeners"
@@ -29,17 +33,17 @@
   <v-card class="px-4">
   <v-card-text>
   <form>
-    <v-select 
-    v-model="id"
-    :items="ids"
-    label="Bind Listener ID" 
-    required
-    ></v-select>
     <v-select
       v-model="implant"
       :items="implants"
       label="Target OS"
       required
+    ></v-select>
+    <v-select 
+    v-model="id"
+    :items="ids"
+    label="Bind Listener ID" 
+    required
     ></v-select>
     <v-btn
       class="mr-4"
@@ -56,8 +60,13 @@
  </v-layout> 
  </v-flex>
 
+ <v-container>
+  <v-alert v-if="alertCopy" type="success" value="true" width="20%" shaped dense dismissible>Implant copied into clipboard!</v-alert>
+</v-container>
 
+  <v-container>
   <v-btn
+      v-if="disabled"
       class="btn"
       color="green"
       @click="copy"
@@ -66,6 +75,7 @@
       Copy
     </v-btn>
     <v-btn
+      v-if="disabled"
       class="btn"
       color="green"
       @click="copy"
@@ -73,10 +83,11 @@
     >
       Download
     </v-btn>
+    </v-container> 
 
 <!-- Code area text field !--> 
    <v-container fluid>
-   <pre class="prettyprint lang-powershell" v-text="code" v-on:focus="$event.target.select()" ref="clone" >
+   <pre v-if="disabled" class="prettyprint" v-text="code" v-on:focus="$event.target.select()" ref="clone">
    </pre>
    </v-container>
 
@@ -94,6 +105,8 @@ export default {
         implant: null,
         implants: ['Windows', 'Linux'], 
         ListenerId: null, 
+        disabled: false, 
+        alertCopy: false,
         listeners: this.getListeners(),
         id: null,
         ids: [],
@@ -111,6 +124,7 @@ export default {
         },
   methods: { 
     async generateImplant() { 
+      this.disabled = true;
       const res = await axios.post('/implant',{ 
         type: this.implant, 
         id: this.id
@@ -129,7 +143,7 @@ export default {
       } 
     }, 
     async getListeners(){ 
-        const res = await axios.get('/api/getListeners/')
+        const res = await axios.get('/listeners')
         .then(function (response) { 
           return response
         })  
@@ -144,8 +158,13 @@ export default {
         return this.listeners
       }, 
     copy() {
-      this.$refs.clone.focus();
-      document.execCommand('copy');
+      var dummy = document.createElement("textarea");
+      document.body.appendChild(dummy);
+      dummy.value = this.code;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+      this.alertCopy = true;
     }
 } 
 } 
@@ -157,124 +176,5 @@ export default {
 .btn { 
   float: right;
 
-}
-.prettyprint {
-  border-radius: 10px;  
-  background: #2f3640;
-  font-family: Menlo, "Bitstream Vera Sans Mono", "DejaVu Sans Mono", Monaco, Consolas, monospace;
-  border: 0 !important;
-}
-
-.pln {
-  color: #e6e9ed;
-}
-
-/* Specify class=linenums on a pre to get line numbering */
-ol.linenums {
-  margin-top: 0;
-  margin-bottom: 0;
-  color: #656d78;
-}
-
-li.L0,
-li.L1,
-li.L2,
-li.L3,
-li.L4,
-li.L5,
-li.L6,
-li.L7,
-li.L8,
-li.L9 {
-  padding-left: 1em;
-  background-color: #2f3640;
-  list-style-type: decimal;
-}
-
-@media screen {
-
-  /* string content */
-
-  .str {
-    color: #ffce54;
-  }
-
-  /* keyword */
-
-  .kwd {
-    color: #4fc1e9;
-  }
-
-  /* comment */
-
-  .com {
-    color: #656d78;
-  }
-
-  /* type name */
-
-  .typ {
-    color: #4fc1e9;
-  }
-
-  /* literal value */
-
-  .lit {
-    color: #ac92ec;
-  }
-
-  /* punctuation */
-
-  .pun {
-    color: #e6e9ed;
-  }
-
-  /* lisp open bracket */
-
-  .opn {
-    color: #e6e9ed;
-  }
-
-  /* lisp close bracket */
-
-  .clo {
-    color: #e6e9ed;
-  }
-
-  /* markup tag name */
-
-  .tag {
-    color: #ed5565;
-  }
-
-  /* markup attribute name */
-
-  .atn {
-    color: #a0d468;
-  }
-
-  /* markup attribute value */
-
-  .atv {
-    color: #ffce54;
-  }
-
-  /* declaration */
-
-  .dec {
-    color: #ac92ec;
-  }
-
-  /* variable name */
-
-  .var {
-    color: #e6e9ed;
-  }
-
-  /* function name */
-
-  .fun {
-    color: #e6e9ed;
-  }
 }
 </style>

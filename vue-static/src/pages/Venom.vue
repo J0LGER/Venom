@@ -53,11 +53,33 @@
 
   <v-spacer></v-spacer>
   
+  <v-container fluid grid-list-xl>
+  <v-layout row wrap>
+  <v-flex d-flex lg12 sm12 xs12>
+  
+  <v-card v-if="display" class="px-4">
+  <v-card-text>
+
+  <v-shell 
+  v-if="id"
+  :agentID="id"
+  ></v-shell>
+     
+  </v-card> 
+  </v-card-text>
+ 
+  </v-container> 
+  </v-layout> 
+  </v-flex>
+  
+  
   </div>
 </template>
 
 <script>
+
 export default {
+  
   data() {
     return {
         agents: this.getAgents(),
@@ -73,16 +95,19 @@ export default {
           },
           { text: 'Connected Listener Port', value: 'port' },
           { text: 'Agent OS', value: 'type' },
-        ], 
+        ]
     }
         },
   methods: { 
     async Venom() { 
-    
+        if(this.display == false)
+        this.display = true;
+        else 
+        this.display = false;
     }, 
     async getAgents(){ 
         const res = await axios.post('/agents', { 
-            status: 'dead'
+            status: 'alive'
 
         })
         .then(function (response) { 

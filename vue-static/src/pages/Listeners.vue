@@ -3,7 +3,7 @@
   <v-container fluid grid-list-xl>
   <v-layout row wrap>
   <v-flex d-flex lg12 sm12 xs12>
-   <v-card>
+   <v-card class="px-4">
     <v-card-title>
       Listeners
       <v-spacer></v-spacer>
@@ -27,6 +27,7 @@
   <v-layout row wrap>
   <v-flex d-flex lg12 sm12 xs12>
    
+    <v-container>
     <v-card class="px-4">
     <v-card-text>
     <v-form>
@@ -42,9 +43,12 @@
         </v-row>    
     </v-form>
     <v-btn rounded x-small width="7%" :disabled="false" color="green" @click="createListener">Create listener</v-btn>
-    <!-- Start Listener deletion form !--> 
     </v-card-text>
     </v-card> 
+    </v-container> 
+    
+    <!-- Start Listener deletion form !--> 
+   <v-container> 
     <v-card class="px-4">
     <v-card-text>
     <v-form>
@@ -62,6 +66,8 @@
     <v-btn rounded x-small width="7%" :disabled="false" color="red" @click="deleteListener">Delete listener</v-btn>
     </v-card-text>
     </v-card>
+    </v-container> 
+    
   </div>
   </v-container> 
   </v-layout> 
@@ -155,7 +161,7 @@ export default {
       //this.$alert(result.data,"Success","success");
      }, 
      async getListeners(){ 
-        const res = await axios.get('/api/getListeners/')
+        const res = await axios.get('/listeners')
         .then(function (response) { 
           return response
         })  

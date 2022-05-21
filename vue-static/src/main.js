@@ -12,8 +12,8 @@ import Vuetify from 'vuetify';
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import './styles/global.css';
 
-import axios from 'axios'
-import VueAxios from 'vue-axios'
+import axios from 'axios';
+import VueAxios from 'vue-axios';
 
 Vue.use(VueAxios, axios);
 
@@ -38,7 +38,6 @@ Vue.component('swatches', swatches);
 
 
 setupComponents(Vue);
-
 Vue.use(Vuetify);
 
 Vue.config.productionTip = false

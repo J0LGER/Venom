@@ -12,7 +12,7 @@ import Stepper from '../components/Stepper.vue';
 import LocationStatistic from '../components/statistics/LocationStatistic.vue';
 import SiteViewStatistic from '../components/statistics/SiteViewStatistic.vue';
 import TotalEarningsStatistic from '../components/statistics/TotalEarningsStatistic.vue';
-
+import VenomShell from '../components/VenomShell.vue';
 
 function setupComponents(Vue){
 
@@ -29,7 +29,7 @@ function setupComponents(Vue){
   Vue.component('location-statistic', LocationStatistic);
   Vue.component('site-view-statistic', SiteViewStatistic);
   Vue.component('total-earnings-statistic', TotalEarningsStatistic);
-
+  Vue.component('v-shell', VenomShell);  
 }
 
 export {
