@@ -1,27 +1,7 @@
-# test-project
 
-> A Vue.js project
+![logo](https://user-images.githubusercontent.com/54769522/169645448-7e3c483a-e7b2-41b0-9567-4b4c0e75bfe2.png)
 
-## Build Setup
+### Venom is A Collaborative Command and Control framework used by red team operators to maintain connection with compromised agents under a stealthy and encrypted channel.
 
-``` bash
-# install dependencies
-npm install
+![image](https://user-images.githubusercontent.com/54769522/169645507-6146e82e-8f82-4601-bbe3-ff862771798b.png)
 
-# serve with hot reload at localhost:8080
-npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
-
-# run unit tests
-npm run unit
-
-# run all tests
-npm test
-```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
