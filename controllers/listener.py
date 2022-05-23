@@ -4,6 +4,8 @@ from http.server import BaseHTTPRequestHandler
 import os
 from controllers.AES import *
 from http.server import HTTPServer
+from threading import Thread
+from time import sleep
 
 ''' 
 TO DO: 
@@ -13,6 +15,9 @@ TO DO:
 
 
 class Listener(BaseHTTPRequestHandler):
+    
+    listenerTimeout = dict()
+
     def do_GET(self):
         # For testing
         if self.path == '/':
@@ -28,6 +33,10 @@ class Listener(BaseHTTPRequestHandler):
                     {'id': agentID}, {'$set': {'ip': agentIP}})
                 db.agents.update_one(
                     {'id': agentID}, {'$set': {'status': 'alive'}})
+                #Start status timer countdown 
+                self.listenerTimeout['agent_%s' %(agentID)] = getAgent(agentID).get('timeout')
+                timer = Thread(target = self.startTimer, args=(agentID,))
+                timer.start()
                 self.send_response(200)
                 self.end_headers()
                 f = "Success"
@@ -40,6 +49,7 @@ class Listener(BaseHTTPRequestHandler):
             agentID = os.path.split(self.path)[1]
             task = checkTask(agentID)
             listenerID = getAgentListener(agentID)
+            self.resetTimer(agentID)
             self.send_response(200)
             self.end_headers()
             if(task):
@@ -73,3 +83,18 @@ class Listener(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
+
+    def startTimer(self, agentID): 
+        while True: 
+            sleep(1)
+            
+            self.listenerTimeout['agent_%s' % (agentID)] = self.listenerTimeout['agent_%s' % (agentID)] - 1 
+            #Timeout expired
+            if (self.listenerTimeout['agent_%s' % (agentID)] == 0): 
+                db.agents.update_one(
+                    {'id': agentID}, {'$set': {'status': 'dead'}})
+                break
+    
+
+    def resetTimer(self, agentID): 
+        self.listenerTimeout['agent_%s' % (agentID)] = 60

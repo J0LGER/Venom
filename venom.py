@@ -17,7 +17,6 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from base64 import b64encode
 import socket as s
-from atexit import register
 
 ''' TO DO: 
 1- Implement a one time registration feature (Not yet)
@@ -200,15 +199,7 @@ if __name__ == "__main__":
 
 
     parser = ArgumentParser(description='Welcome to VENOM')
-    parser.add_argument('--port', type=int, required=True,
-                        default='8080', help='Port number, Default set to 8080')
+    parser.add_argument('--port', type=int, required=True, default='8080', help='Port number, Default set to 8080')
     args = parser.parse_args()
     migrate()
-    register(db.listeners.delete_many,{})
-    register(db.agents.delete_many,{})
     app.run(host='0.0.0.0', port=args.port, debug=True)
-    # if(db.venom.find_one({'username': {'$eq': 'admin' }, 'password': {'$eq': "admin".encode('utf-8').hexdigest()} })):
-    #   _REG_FLAG_ = 1
-    # else:
-    #   db.venom.insert({'username': {'$eq': 'admin' }, 'password': {'$eq': "admin".encode('utf-8').hexdigest()} }))
-    #  _REG_FLAG_ = 0

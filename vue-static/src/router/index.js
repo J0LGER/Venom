@@ -40,17 +40,6 @@ export default new Router({
       }
     },
     {
-      path: '/snackbar',
-      name: 'Snackbar',
-      component: Snackbar,
-      meta: {
-        breadcrumb: [
-          { name: 'dashboard', href: 'Dashboard' },
-          { name: 'snackbar' }
-        ]
-      }
-    },
-    {
       path: '/listeners',
       name: 'listeners',
       component: Listeners,
@@ -70,36 +59,6 @@ export default new Router({
           { name: 'dashboard', href: 'Dashboard' },
           { name: 'venom' }
         ]
-      }
-    },
-    {
-      path: '/media',
-      name: 'Media',
-      component: Media,
-      meta: {
-        breadcrumb: [
-          { name: 'dashboard', href: 'Dashboard' },
-          { name: 'media' }
-        ]
-      }
-    },
-    {
-      path: '/chart',
-      name: 'Chart',
-      component: Chart,
-      meta: {
-        breadcrumb: [
-          { name: 'dashboard', href: 'Dashboard' },
-          { name: 'charts' }
-        ]
-      }
-    },
-    {
-      path: '/login',
-      name: 'Login',
-      component: Login,
-      meta: {
-        allowAnonymous: true
       }
     },
     {

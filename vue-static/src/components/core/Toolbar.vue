@@ -141,7 +141,7 @@
       {{ result }}
     </v-snackbar>
 
-    <v-btn icon href="https://github.com/fatihunlu" :ripple="false">
+    <v-btn icon href="https://github.com/J0LGER/Venom" :ripple="false">
       <v-icon medium>fab fa-github</v-icon>
     </v-btn>
     <v-menu  class="toolbar-menu-item" offset-y origin="center center" :nudge-bottom="10" transition="scale-transition">
