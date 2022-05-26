@@ -94,6 +94,7 @@ export default {
             value: 'id',
           },
           { text: 'Connected Listener Port', value: 'port' },
+          { text: 'Agent IP', value: 'ip' }, 
           { text: 'Agent OS', value: 'type' },
         ]
     }

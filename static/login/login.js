@@ -27,6 +27,26 @@ new Vue({
           });
             
         }
+        else if (this.$refs.registerForm.validate()) { 
+          axios({
+            method: 'post',
+            url: '/register',
+            data: {
+              email: this.email,
+              password: this.password
+            }
+          }).then(
+            response => window.location.href = '/')
+            .catch(
+            function (error) {
+            // handle error
+            alert(error.response.data)
+            this.error = error.response.data
+    
+          });
+
+
+        }
       },
       reset() {
         this.$refs.form.reset();

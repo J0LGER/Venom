@@ -13,14 +13,7 @@
       :label="$t('search')">
     </v-text-field>
     <v-spacer></v-spacer>
-    <v-rating
-        v-model="rating"
-        background-color="white"
-        medium
-        :ripple="false"
-        color="white"
-        dense />
-
+    
     <v-dialog
       v-model="dialog"
       width="500">
@@ -144,68 +137,11 @@
     <v-btn icon href="https://github.com/J0LGER/Venom" :ripple="false">
       <v-icon medium>fab fa-github</v-icon>
     </v-btn>
-    <v-menu  class="toolbar-menu-item" offset-y origin="center center" :nudge-bottom="10" transition="scale-transition">
-
-      <v-btn icon flat slot="activator" @click="notifications.map(x => x.isActive = false)">
-        <v-badge color="green" overlap>
-          <span slot="badge" v-if="notifications.filter(x => x.isActive).length > 0">
-             {{ notifications.filter(x => x.isActive).length }}
-          </span>
-          <v-icon medium>notifications</v-icon>
-        </v-badge>
-      </v-btn>
-
-      <v-card class="elevation-0">
-        <v-toolbar card dense color="transparent">
-          <v-toolbar-title><h5>You have {{ notifications.length }} new notification(s)</h5></v-toolbar-title>
-        </v-toolbar>
-        <v-card-text class="pa-0">
-          <v-list two-line class="pa-0">
-          <template v-for="(item, index) in notifications">
-            <v-divider :key="index" />
-            <v-list-tile avatar :key="item.title" @click.parent="item.onClick">
-            <v-list-tile-avatar :color="item.color">
-              <v-icon dark>{{item.icon}}</v-icon>
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-sub-title v-html="item.title"></v-list-tile-sub-title>
-            </v-list-tile-content>
-            <v-list-tile-action class="caption">
-              {{item.actionAt}}
-            </v-list-tile-action>
-            </v-list-tile>
-          </template>
-          </v-list>
-          <v-divider></v-divider>
-          <v-btn block flat v-if="false">See all notifications</v-btn>
-          <v-divider></v-divider>
-        </v-card-text>
-      </v-card>
-    </v-menu>
-    <v-menu  class="toolbar-menu-item" offset-y origin="center center" :nudge-bottom="10" transition="scale-transition" content-class="language-menu">
-      <v-btn icon large flat slot="activator" :ripple="false" >
-        <img :src="selectedLanguageFlag" class="selected-language-flag" />
-      </v-btn>
-      <v-list class="languages-list">
-        <v-list-tile
-          v-for="(language,index) in languages"
-          @click="selectLanguage(language.languageCode)"
-          :key="index"
-          class="languages-list-item">
-            <v-list-tile-action v-if="language.path">
-              <img :src="language.path" class="language-flag" />
-            </v-list-tile-action>
-            <v-list-tile-content class="languages-list-item-title">
-              <v-list-tile-title >{{ language.name }}</v-list-tile-title>
-            </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-    </v-menu>
-
+    
     <v-menu class="toolbar-menu-item" offset-y origin="center center" :nudge-bottom="10" transition="scale-transition">
       <v-btn icon large flat slot="activator" :ripple="false">
         <v-avatar size="42px">
-          <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Sunglasses&hairColor=Black&facialHairType=Blank&clotheType=CollarSweater&clotheColor=Black&eyeType=Default&eyebrowType=Default&mouthType=Smile&skinColor=Light"/>
+          <img src="https://st4.depositphotos.com/1832477/27386/v/1600/depositphotos_273866520-stock-illustration-hacker-using-a-laptop-icon.jpg"/>
         </v-avatar>
       </v-btn>
       <v-list>

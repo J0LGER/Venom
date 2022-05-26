@@ -2,7 +2,7 @@
   <v-data-table
     class="table"
     :headers="headers"
-    :items="users"
+    :items="agents"
     :rows-per-page-items="[10, 25]">
     <template slot="items" slot-scope="props">
       <td class="text-xs-left">
@@ -10,92 +10,59 @@
           <img :src="randomAvatar()" alt="avatar">
         </v-avatar>
       </td>
-      <td class="text-xs-left">{{ props.item.name }}</td>
-      <td class="text-xs-left">{{ props.item.username }}</td>
-      <td class="text-xs-left">{{ props.item.email }}</td>
-      <td class="text-xs-left">{{ props.item.phone }}</td>
-      <td class="text-xs-left">{{ props.item.company.name }}</td>
-      <td class="text-xs-left">{{ props.item.website }}</td>
-      <!-- <td class="text-xs-left">{{ props.item.address.city }}</td> -->
+      <td class="text-xs-left">{{ props.item.id }}</td>
+      <td class="text-xs-left">{{ props.item.ip }}</td>
+      <td class="text-xs-left">{{ props.item.port }}</td>
+      <td class="text-xs-left">{{ props.item.type }}</td>
     </template>
   </v-data-table>
 </template>
 
 <script>
-
 const avatars = [
-  'https://avataaars.io/?accessoriesType=Blank&avatarStyle=Circle&clotheColor=PastelGreen&clotheType=ShirtScoopNeck&eyeType=Wink&eyebrowType=UnibrowNatural&facialHairColor=Black&facialHairType=MoustacheMagnum&hairColor=Platinum&mouthType=Concerned&skinColor=Tanned&topType=Turban',
-  'https://avataaars.io/?accessoriesType=Sunglasses&avatarStyle=Circle&clotheColor=Gray02&clotheType=ShirtScoopNeck&eyeType=EyeRoll&eyebrowType=RaisedExcited&facialHairColor=Red&facialHairType=BeardMagestic&hairColor=Red&hatColor=White&mouthType=Twinkle&skinColor=DarkBrown&topType=LongHairBun',
-  'https://avataaars.io/?accessoriesType=Prescription02&avatarStyle=Circle&clotheColor=Black&clotheType=ShirtVNeck&eyeType=Surprised&eyebrowType=Angry&facialHairColor=Blonde&facialHairType=Blank&hairColor=Blonde&hatColor=PastelOrange&mouthType=Smile&skinColor=Black&topType=LongHairNotTooLong',
-  'https://avataaars.io/?accessoriesType=Round&avatarStyle=Circle&clotheColor=PastelOrange&clotheType=Overall&eyeType=Close&eyebrowType=AngryNatural&facialHairColor=Blonde&facialHairType=Blank&graphicType=Pizza&hairColor=Black&hatColor=PastelBlue&mouthType=Serious&skinColor=Light&topType=LongHairBigHair',
-  'https://avataaars.io/?accessoriesType=Kurt&avatarStyle=Circle&clotheColor=Gray01&clotheType=BlazerShirt&eyeType=Surprised&eyebrowType=Default&facialHairColor=Red&facialHairType=Blank&graphicType=Selena&hairColor=Red&hatColor=Blue02&mouthType=Twinkle&skinColor=Pale&topType=LongHairCurly',
-  'https://avataaars.io/?'
+  'https://st3.depositphotos.com/1007566/12989/v/950/depositphotos_129895474-stock-illustration-hacker-character-avatar-icon.jpg',
+  'https://st4.depositphotos.com/5934840/25423/v/1600/depositphotos_254235584-stock-illustration-security-system-technology.jpg',
+  'https://st2.depositphotos.com/1432405/11949/v/950/depositphotos_119499226-stock-illustration-hacker-behind-a-computer-icon.jpg',
+  'https://st3.depositphotos.com/1832477/19518/v/1600/depositphotos_195187320-stock-illustration-hacker-in-black-clothes-and.jpg',
+  'https://st4.depositphotos.com/1832477/27386/v/1600/depositphotos_273866520-stock-illustration-hacker-using-a-laptop-icon.jpg'
 ];
-
 export default {
+   props: { 
+        status: String
+      },
   data() {
     return {
-      users: [],
+      agents: [],
       headers: [
-        {
-          value: 'Avatar',
-          align: 'left',
-          sortable: false
-        },
-        {
-          text: 'Name',
-          value: 'Name',
-          align: 'left',
-          sortable: true
-        },
-        {
-          text: 'User Name',
-          value: 'Username',
-          align: 'left',
-          sortable: true
-        },
-        {
-          text: 'Email',
-          value: 'Email',
-          align: 'left',
-          sortable: true
-        },
-        {
-          text: 'Phone',
-          value: 'Phone',
-          align: 'left',
-          sortable: true
-        },
-        {
-          text: 'Company',
-          value: 'Company',
-          align: 'left',
-          sortable: true
-        },
-        {
-          text: 'Website',
-          value: 'Website',
-          align: 'left',
-          sortable: true
-        }
-      ]
+
+          { 
+            text: this.status + ' Agents' 
+          },
+          {
+            text: 'Agent ID',
+            filterable: false,
+            value: 'id',
+          },
+          { text: 'Agent IP', value: 'ip' },
+          { text: 'Connected Listener Port', value: 'port' }, 
+          { text: 'Agent OS', value: 'type' },
+        ], 
     }
   },
-
   methods: {
     randomAvatar () {
-
       return avatars[Math.floor(Math.random() * avatars.length)];
     }
   },
-
-  created() {
+  async created() {
     const vm = this;
-
-    vm.axios.get('https://jsonplaceholder.typicode.com/users').then(response => {
+    console.log(this.status);
+    await vm.axios.post('/agents',{ 
+      status: this.status
+    })
+    .then(response => {
       var result = response && response.data;
-
-      vm.users = result;
+      vm.agents = result.agents;
     });
   }
 }

