@@ -2,7 +2,7 @@ flask
 regex
 argparse
 thread6 
-jwt
+pyjwt
 pycryptodome 
 requests
 sockets
