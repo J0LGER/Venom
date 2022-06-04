@@ -1,0 +1,10 @@
+flask
+regex
+argparse
+thread6 
+jwt
+pycryptodome 
+requests
+sockets
+pybase64
+pymongo
