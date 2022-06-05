@@ -25,7 +25,5 @@ pip3 install -r requirments.txt
 ``` 
 
 # Usage 
-Run Venom with specified port 
-```bash 
-python3 venom.py --port 1337
-``` 
+Please refer to Venom documentation and usage guide 
+https://j0lger.github.io/bloghub/bloghub/venom/
