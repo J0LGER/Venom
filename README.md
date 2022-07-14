@@ -29,3 +29,7 @@ Run Venom with specified port
 ```bash 
 python3 venom.py --port 1337
 ``` 
+Run Venom and enable SSL for http listeners 
+```bash 
+python3 venom.py --port 1337 --ssl 
+``` 

