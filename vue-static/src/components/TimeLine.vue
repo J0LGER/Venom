@@ -5,129 +5,51 @@
     <v-card
       dark
       flat>
-      <v-btn
-        absolute
-        bottom
-        color="pink"
-        right
-        fab
-        @click="onAddPerson">
-        <v-icon>person_add</v-icon>
-      </v-btn>
       <v-card-title class="pa-2 purple lighten-3">
-        <v-btn icon>
-          <v-icon>mdi-menu</v-icon>
-        </v-btn>
-        <h3 class="title font-weight-light text-xs-center grow">Timeline</h3>
-        <v-avatar>
-          <v-img :src="avatarIcon"></v-img>
-        </v-avatar>
+        <h3 class="title font-weight-light text-xs-center grow">Current Time</h3>
       </v-card-title>
       <v-img
-        src="https://cdn.vuetifyjs.com/images/cards/forest.jpg"
+        src="https://img.freepik.com/free-photo/colorful-3d-shapes-vaporwave-style_23-2148981126.jpg?w=996&t=st=1653735300~exp=1653735900~hmac=9542c704eb1046966f79a02b3579651597c28ca03b783a9f41cfafe09361080c"
         gradient="to top, rgba(0,0,0,.44), rgba(0,0,0,.44)">
         <v-container fill-height>
           <v-layout align-center>
-            <strong class="display-4 font-weight-regular mr-4">8</strong>
+            <strong class="display-3 font-weight-light mr-4">{{ this.time }}</strong>
             <v-layout column justify-end>
-              <div class="headline font-weight-light">Monday</div>
-              <div class="text-uppercase font-weight-light">February 2015</div>
+              <div class="headline font-weight-light">{{ this.date }}</div>
             </v-layout>
           </v-layout>
         </v-container>
       </v-img>
-    </v-card>
-    <v-card-text class="py-0">
-      <v-timeline
-        align-top
-        dense>
-        <v-timeline-item
-          color="pink"
-          small>
-          <v-layout pt-3>
-            <v-flex xs3>
-              <strong>5pm</strong>
-            </v-flex>
-            <v-flex>
-              <strong>New Icon</strong>
-              <div class="caption">Mobile App</div>
-            </v-flex>
-          </v-layout>
-        </v-timeline-item>
-
-        <v-timeline-item
-          color="teal lighten-3"
-          small>
-          <v-layout wrap pt-3>
-            <v-flex xs3>
-              <strong>3-4pm</strong>
-            </v-flex>
-            <v-flex>
-              <strong>Design Stand Up</strong>
-              <div class="caption mb-2">Hangouts</div>
-              <v-avatar>
-                <v-img
-                  src="https://avataaars.io/?topType=LongHairFrida&accessoriesType=Kurt&hairColor=Red&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=GraphicShirt&clotheColor=Gray01&graphicType=Skull&eyeType=Wink&eyebrowType=RaisedExcitedNatural&mouthType=Disbelief&skinColor=Brown"
-                ></v-img>
-              </v-avatar>
-              <v-avatar>
-
-                <v-img
-                  src="https://avataaars.io/?topType=ShortHairFrizzle&accessoriesType=Prescription02&hairColor=Black&facialHairType=MoustacheMagnum&facialHairColor=BrownDark&clotheType=BlazerSweater&clotheColor=Black&eyeType=Default&eyebrowType=FlatNatural&mouthType=Default&skinColor=Tanned"
-                ></v-img>
-              </v-avatar>
-              <v-avatar>
-                <v-img
-                  src="https://avataaars.io/?topType=LongHairMiaWallace&accessoriesType=Sunglasses&hairColor=BlondeGolden&facialHairType=Blank&clotheType=BlazerSweater&eyeType=Surprised&eyebrowType=RaisedExcited&mouthType=Smile&skinColor=Pale"
-                ></v-img>
-              </v-avatar>
-            </v-flex>
-          </v-layout>
-        </v-timeline-item>
-
-        <v-timeline-item
-          color="pink"
-          small>
-          <v-layout pt-3>
-            <v-flex xs3>
-              <strong>12pm</strong>
-            </v-flex>
-            <v-flex>
-              <strong>Lunch break</strong>
-            </v-flex>
-          </v-layout>
-        </v-timeline-item>
-
-        <v-timeline-item
-          color="teal lighten-3"
-          small>
-          <v-layout pt-3>
-            <v-flex xs3>
-              <strong>9-11am</strong>
-            </v-flex>
-            <v-flex>
-              <strong>Finish Home Screen</strong>
-              <div class="caption">Web App</div>
-            </v-flex>
-          </v-layout>
-        </v-timeline-item>
-      </v-timeline>
-    </v-card-text>
-  </v-card>
 </template>
 
 <script>
 export default {
   data() {
     return {
-      avatarIcon: 'https://avataaars.io/?avatarStyle=Transparent&topType=ShortHairDreads01&accessoriesType=Prescription02&hairColor=Brown&facialHairType=BeardLight&facialHairColor=Blonde&clotheType=GraphicShirt&clotheColor=Heather&graphicType=SkullOutline&eyeType=Happy&eyebrowType=RaisedExcited&mouthType=Twinkle&skinColor=Yellow'
+      date: '',
+      time: '',
+      avatarIcon: 'https://st3.depositphotos.com/1832477/19518/v/1600/depositphotos_195187320-stock-illustration-hacker-in-black-clothes-and.jpg', 
+
     }
   },
 
   methods: {
-    onAddPerson() {
+    async getTime() {
+      
+      const vm = await axios.get('/getTime') 
+      this.date = vm.data.date;
+      this.time = vm.data.time;
 
     }
+
+  }, 
+  async created(){ 
+    while(true) {
+    const vm = await axios.get('/getTime') 
+      this.date = vm.data.date;
+      this.time = vm.data.time;
+      await new Promise(r => setTimeout(r, 60000));
+    } 
   }
 }
 </script>

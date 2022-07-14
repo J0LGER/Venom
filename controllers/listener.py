@@ -7,14 +7,8 @@ from http.server import HTTPServer
 from threading import Thread
 from time import sleep
 
-''' 
-TO DO: 
-1- Response handling should not return a callback/error message but should act silent instead (done)
-2- Listeners should be cleared afetr reboot (done)
-'''
 
-
-class Listener(BaseHTTPRequestHandler):
+class Listener(BaseHTTPRequestHandler): 
     
     listenerTimeout = dict()
 

